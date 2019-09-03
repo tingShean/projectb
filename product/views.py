@@ -3,11 +3,10 @@ from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.db.models import F
 from .models import ProductList, Order
-from .object import ProductObject
-from order.object import OrderObject
 from decorators.inventories import inventories
 from decorators.check_user import check_user
 from utils.tools import response_err
+from django.views.decorators.csrf import csrf_exempt
 
 import json
 
@@ -17,8 +16,11 @@ def index(request):
     tmpl = loader.get_template('product_list.html')
     pro_list = ProductList.objects.all()
 
+    ord_list = Order.objects.all()
+
     context = {
         'pro_list': pro_list if pro_list else {},
+        'ord_list': ord_list if ord_list else {},
     }
     return render(request, 'product_list.html', context)
 
@@ -48,12 +50,13 @@ def plist(request, pid, stock_pcs):
 
 @inventories
 @check_user
+@csrf_exempt
 def add_order(request):
     """add order in db"""
     try:
         pid = request.POST['product_id']
         prod = ProductList.objects.filter(product_id=pid).values()
-        print(prod[0])
+        # print(prod[0])
 
         if not prod.exists():
             return JsonResponse(response_err(code=1000))
@@ -64,7 +67,8 @@ def add_order(request):
             product_id=prod[0]['product_id'],
             qty=qty,
             price=(qty * prod[0]['price']),
-            shop_id=prod[0]['shop_id']
+            shop_id=prod[0]['shop_id'],
+            customer_id=request.POST['customer_id'],
         )
 
         amount = prod[0]['stock_pcs'] - qty

@@ -6,7 +6,7 @@
             <tr>
                 <th>
                   {% if pro_list %}
-                  <select>
+                  <select class="customer_order" id="product_id">
                     <option value="">Select Product</option>
                     {% for pro in pro_list %}
                     <option value="{{ pro.product_id}}">{{ pro.product_id }}</option>
@@ -15,7 +15,7 @@
                   {% endif %}
                   <!-- <input type="text" class="customer_order" id="product_id" /> -->
                 </th>
-                <th><input type="text" class="customer_order" id="product_price" /></th>
+                <th><input type="text" class="customer_order" id="stock_pcs" /></th>
                 <th><input type="button" id="addrow" value="＋" /></th>
                 <th><input type="text" class="customer_order" id="customer_id" /></th>
                 <th><input type="checkbox" id="customer_vip" />是否成為 VIP</th>
@@ -29,7 +29,7 @@
         <thead>
             <tr>
                 <th>Product ID</th>
-                <th>shock_pcs</th>
+                <th>stock_pcs</th>
                 <th>price</th>
                 <th>shop_id</th>
                 <th>vip</th>
@@ -78,46 +78,120 @@
             </tr>
         </thead>
         <tbody id="trlist">
+        {% if not ord_list %}
           <tr>
             <td></td>
             <td></td>
             <td></td>
             <td></td>
             <td></td>
-            <td><input type="button" id="removerow" value="－" /></td>
+            <td></td>
           </tr>
+        {% else %}
+            {% for order in ord_list %}
+            <tr>
+                <td>{{ order.product_id }}</td>
+                <td>{{ order.qty }}</td>
+                <td>{{ order.price }}</td>
+                <td>{{ order.shop_id }}</td>
+                <td>{{ order.customer_id }}</td>
+                <td>
+                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                    <input type="button" onclick="removerow(this)" name="{{ order.id }}" id="removerow" value="－" />
+                </td>
+            </tr>
+            {% endfor %}
+        {% endif %}
         </tbody>
     </table>
     <script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
 <script type="text/javascript">
     $(function(){
         $("#addrow").click(cloneaddrow);//绑定添加事件
-        $("#removerow").click(removerow);//绑定删除事件。
+        // $("#removerow").click(removerow);//绑定删除事件。
     });
     
-   function cloneaddrow(){
-        //$(".table>tbody:last").append($("#tr").clone());//复制tr，并且添加
-        column = "<tr>"
-        $('.customer_order').each(function(i, n){
-          // if $(n).attr('customer_vip').prop("checked") {
-            // order = $(n).prop("checked")
-          order = $(n).val()
-          console.log(order)
-          column += "<td>"+ order +"</td>"
-        })
-        vip = $("#customer_vip").prop("checked")
-        console.log(vip)
-        column += "<td>"+ vip +"</td>"
-        column += "<td><input type='button' id='removerow' value='－' /></td>"
-        column += "</tr>"
+    function cloneaddrow(e){
+        e.preventDefault();
+        vip = 0;
+        if ($('.customer_order#customer_vip').prop("checked")) {
+            vip = 1;
+        }
+        $.ajax({
+            type: "POST", 
+            url: "/product/add_order",
+            data: {
+                "product_id": $('.customer_order#product_id').val(),
+                "stock_pcs": $('.customer_order#stock_pcs').val(),
+                "vip": vip,
+                "customer_id": $('.customer_order#customer_id').val(),
+            },
 
-        $(".customer_order_table>tbody:last").append(column)
+            success: function(result) {
+                console.log(result)
+                if (result['status'] == 1) {
+                    alert('error');
+                    return;
+                }
+                // column = "<tr>";
+                // column += "<td>"+ result['product_id'] +"</td>";
+                // column += "<td>"+ result['qty'] +"</td>";
+                // column += "<td>"+ result['price'] +"</td>";
+                // column += "<td>"+ result['shop_id'] +"</td>";
+                // column += "<td>"+ result['customer_id'] +"</td>";
+                // $('.customer_order').each(function(i, n){
+                //     order = $(n).val();
+                //     console.log(order);
+                //     column += "<td>"+ order +"</td>";
+                // });
+                // vip = $("#customer_vip").prop("checked");
+                // console.log(vip);
+                // column += "<td>"+ vip +"</td>";
+                // column += "<td><input type='button' id='removerow' value='－' /></td>";
+                // column += "</tr>";
+
+                // $(".customer_order_table>tbody:last").append(column);
+                $( ".product_table" ).load( "/product/index .product_table" );
+                $( ".customer_order_table" ).load( "/product/index .customer_order_table" );
+            },
+
+            error: function(result) {
+                alert('error');
+            }
+        });
+        //$(".table>tbody:last").append($("#tr").clone());//复制tr，并且添加
     }
     
-    function removerow(){//移除
-        $('input[name="checkbox"]:checked').each(function(){
-          $(this).parent().parent().remove();//移除当前行 checkbox的父级是td，td的父级是tr，然后删除tr。就ok了。用each，选择多行遍历删除
+    function removerow(e){//移除
+        // e.preventDefault();
+        console.log(e)
+
+        // $('input[name="checkbox"]:checked').each(function(){
+        order_id = $(e).attr("name");
+        console.log(order_id)
+        $.ajax({
+            type: "POST", 
+            url: "/product/del_order",
+            data: {
+                'order_id': order_id,
+            },
+
+            success: function(result) {
+                console.log(result);
+                if (result['status'] == 1) {
+                    alert('Got error:' + result);
+                    return;
+                }
+                // $(this).parent().parent().remove();//移除
+                $(e).parent().parent().remove();
+                $( ".product_table" ).load( "/product/index .product_table" );
+            },
+
+            error: function(result) {
+                alert('error');
+            }
         });
+        // });
     }
 </script>
 </body>

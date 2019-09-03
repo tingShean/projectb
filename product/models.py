@@ -16,3 +16,4 @@ class Order(models.Model):
 	qty = models.IntegerField()
 	price = models.IntegerField()
 	shop_id = models.CharField(max_length=20, blank=True, null=True)
+	customer_id = models.CharField(max_length=20, blank=True, null=True)
