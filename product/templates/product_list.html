@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <table class="order_table">
+        <thead>
+            <tr>
+                <th>
+                  {% if pro_list %}
+                  <select>
+                    <option value="">Select Product</option>
+                    {% for pro in pro_list %}
+                    <option value="{{ pro.product_id}}">{{ pro.product_id }}</option>
+                    {% endfor %}
+                  </select>
+                  {% endif %}
+                  <!-- <input type="text" class="customer_order" id="product_id" /> -->
+                </th>
+                <th><input type="text" class="customer_order" id="product_price" /></th>
+                <th><input type="button" id="addrow" value="＋" /></th>
+                <th><input type="text" class="customer_order" id="customer_id" /></th>
+                <th><input type="checkbox" id="customer_vip" />是否成為 VIP</th>
+            </tr>
+        </thead>
+    </table>
+    <br>
+    商品列表
+    <br>
+    <table class="product_table" width="100%">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>shock_pcs</th>
+                <th>price</th>
+                <th>shop_id</th>
+                <th>vip</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="trlist">
+        {% if not pro_list %}
+            <tr id="tr">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        {% else %}
+          {% for pro in pro_list %}
+            <tr id="tr">
+                <td>{{ pro.product_id }}</td>
+                <td>{{ pro.stock_pcs }}</td>
+                <td>{{ pro.price }}</td>
+                <td>{{ pro.shop_id }}</td>
+                {% if pro.vip %}
+                  <td><input type="checkbox" name="checkbox" checked="checked" disabled="disabled" /></td>
+                {% else %}
+                  <td><input type="checkbox" name="checkbox" disabled="disabled" /></td>
+                {% endif %}
+            </tr>
+          {% endfor %}
+        {% endif %}
+        </tbody>
+    </table>
+    <br>
+    訂單紀錄
+    <br>
+    <table class="customer_order_table" width="100%">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>stock_pcs</th>
+                <th>price</th>
+                <th>shop_id</th>
+                <th>Customer ID</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="trlist">
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><input type="button" id="removerow" value="－" /></td>
+          </tr>
+        </tbody>
+    </table>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+        $("#addrow").click(cloneaddrow);//绑定添加事件
+        $("#removerow").click(removerow);//绑定删除事件。
+    });
+    
+   function cloneaddrow(){
+        //$(".table>tbody:last").append($("#tr").clone());//复制tr，并且添加
+        column = "<tr>"
+        $('.customer_order').each(function(i, n){
+          // if $(n).attr('customer_vip').prop("checked") {
+            // order = $(n).prop("checked")
+          order = $(n).val()
+          console.log(order)
+          column += "<td>"+ order +"</td>"
+        })
+        vip = $("#customer_vip").prop("checked")
+        console.log(vip)
+        column += "<td>"+ vip +"</td>"
+        column += "<td><input type='button' id='removerow' value='－' /></td>"
+        column += "</tr>"
+
+        $(".customer_order_table>tbody:last").append(column)
+    }
+    
+    function removerow(){//移除
+        $('input[name="checkbox"]:checked').each(function(){
+          $(this).parent().parent().remove();//移除当前行 checkbox的父级是td，td的父级是tr，然后删除tr。就ok了。用each，选择多行遍历删除
+        });
+    }
+</script>
+</body>
+</html>
