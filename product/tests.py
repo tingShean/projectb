@@ -59,7 +59,22 @@ class ProductViewTest(TestCase):
         print(resp.content)
         self.assertEqual(resp.status_code, 200)
 
+        data = {'product_id': 2, 'stock_pcs': 2, 'customer_id': 1, 'vip': 0}
+        resp = self.client.post('/product/add_order', data)
+        print(resp.content)
+        self.assertEqual(resp.status_code, 200)
+
+        data = {'product_id': 4, 'stock_pcs': 1, 'customer_id': 1, 'vip': 1}
+        resp = self.client.post('/product/add_order', data)
+        print(resp.content)
+        self.assertEqual(resp.status_code, 200)
+
         data = {'order_id': 1}
         resp = self.client.post('/product/del_order', data)
+        print(resp.content)
+        self.assertEqual(resp.status_code, 200)
+
+    # def test_cronjob(self):
+        resp = self.client.get('/product/cronjob')
         print(resp.content)
         self.assertEqual(resp.status_code, 200)

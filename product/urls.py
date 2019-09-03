@@ -7,4 +7,5 @@ urlpatterns = [
 	path('list/<int:pid>/<int:stock_pcs>', views.plist),
 	path('add_order', views.add_order),
 	path('del_order', views.del_order),
+	path('cronjob', views.cronjob),
 ]

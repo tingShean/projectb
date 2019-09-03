@@ -113,4 +113,23 @@ def del_order(request):
     return JsonResponse({})
 
 
+def cronjob(request):
+    order_list = Order.objects.all()
 
+    if len(order_list) == 0:
+        return JsonResponse({})
+
+    report = {}
+    for order in order_list:
+        if order.shop_id not in report:
+            report[order.shop_id] = {
+                'total_money': 0,
+                'total_qty': 0,
+                'total_orders': 0,
+            }
+
+        report[order.shop_id]['total_money'] += order.qty * order.price
+        report[order.shop_id]['total_qty'] += order.qty
+        report[order.shop_id]['total_orders'] += 1
+
+    return JsonResponse(report)
